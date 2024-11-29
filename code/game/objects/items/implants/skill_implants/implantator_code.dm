@@ -12,7 +12,6 @@
 	throw_speed = 1
 	throw_range = 5
 	w_class = WEIGHT_CLASS_TINY
-	obj/item/implant/internal_implant = /obj/item/implant/skill
 	allowed_limbs
 	var/spented = FALSE
 	var/max_skills
@@ -22,7 +21,6 @@
 /obj/item/implanter/implantator/Initialize(mapload, ...)
 	. = ..()
 	name = name + " implanter"
-	desc = internal_implant.desc
 	if(!allowed_limbs)
 		allowed_limbs = GLOB.human_body_parts
 
@@ -37,13 +35,6 @@
 
 /obj/item/implanter/implantator/attack(mob/living/target, mob/living/user, list/implants, datum/limb/targetlimb, var/obj/item/implant/skill/i)
 	. = ..()
-	if(spented == TRUE)
-		return FALSE
-	if(!ishuman(target))
-		return FALSE
-	if(!internal_implant)
-		to_chat(user, span_warning("There is no implant in the [src]!"))
-		return FALSE
 	if(!(user.zone_selected in allowed_limbs))
 		balloon_alert(user, "wrong limb!")
 		return FALSE
@@ -51,21 +42,6 @@
 		has_implant(targetlimb)
 		balloon_alert(user, "limb already implanted!")
 		return FALSE
-	user.visible_message(span_warning("[user] is attemping to implant [target]."), span_notice("You're attemping to implant [target]."))
-	if(!do_after(user, 5 SECONDS, NONE, target, BUSY_ICON_GENERIC))
-		to_chat(user, span_notice("You failed to implant [target]."))
-		return FALSE
-	if(internal_implant.try_implant(target, user))
-		target.visible_message(span_warning("[target] has been implanted by [user]."))
-		log_combat(user, target, "implanted", src)
-		internal_implant = null
-		name = name + "used"
-		desc = desc + "It's spent."
-		icon_state = empty_icon + "_s"
-		spented = TRUE
-		return TRUE
-	to_chat(user, span_notice("You fail to implant [target]."))
-	return
 
 /obj/item/implanter/implantator/combat
 	allowed_limbs = list(BODY_ZONE_L_ARM, BODY_ZONE_R_ARM)
